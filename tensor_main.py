@@ -40,3 +40,29 @@ train_x, test_x, train_y, train_y = train_test_split(X, Y, test_size=0.2, random
 # print(train_x.shape, test_x.shape, train_y.shape, train_y.shape)
 
 # defining the imp parameters
+learning_rate = 0.3
+training_epocs = 1000            # no of iterations
+cost_history = np.empty(shape=[1], dtype=float)
+n_dim = X.shape[1]
+print("n_dim", n_dim)
+n_classes = 2       #no of classes Mine and Rock so 2
+model_path = "D:\\PycharmProjects\\TensorFlow_Models\\NMI"
+
+# defining the hidden layer and ip and op layer
+n_hidden_1 = 60
+n_hidden_2 = 60
+n_hidden_3 = 60
+n_hidden_4 = 60
+
+
+# Defining my placeholders and variables : input ,weights,biases and output
+x = tf.placeholder(tf.float32, [None, n_dim])
+W = tf.variable(tf.zeros([n_dim, n_classes]))
+b = tf.variable(tf.zeros([n_classes]))
+y_ = tf.placeholder(tf.float32, [None, n_classes])
+
+
+# defining my model
+def multilayer_perceptron(x, weights,biases):
+
+    return 2
