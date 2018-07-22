@@ -34,7 +34,7 @@ X, Y = read_dataset()
 X, Y = shuffle(X, Y, random_state=1)
 print(shuffle(X, Y, random_state=1))
 # split the test cases and train
-train_x, test_x, train_y, train_y = train_test_split(X, Y, test_size=0.2, random_state=1)
+train_x, test_x, train_y, test_y = train_test_split(X, Y, test_size=0.2, random_state=1)
 
 # testing the shape
 # print(train_x.shape, test_x.shape, train_y.shape, train_y.shape)
@@ -122,7 +122,7 @@ y = multilayer_perceptron(x,weights,biases)
 
 # logits is output given by hypothesis
 # labels are the actual output we know
-cost_function = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y, label=y_))
+cost_function = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=y, labels=y_))
 
 # gradientdecent optimizer
 
@@ -133,10 +133,24 @@ sess.run(init)
 
 # calculate the cost and accuracy for each iteration
 
-for epoc in range(training_epocs):
+mse_history = []
+accuracy_history = []
+
+
+for epoch in range(training_epocs):
     sess.run(training_steps, feed_dict={x: train_x, y_: train_y})
     cost = sess.run(cost_function, feed_dict={x: train_x, y_: train_y})
     cost_history = np.append(cost_history, cost)
     correct_prediction = tf.equal(tf.arg_max(y, 1),tf.arg_max(y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     pred_y = sess.run(y, feed_dict={x: test_x})
+    # means quare error
+    mse = tf.reduce_mean(tf.square(pred_y - test_y))
+    mse_ = sess.run(mse)
+    mse_history.append(mse_)
+    accuracy = sess.run(accuracy, feed_dict={x: train_x, y_: train_y})
+    accuracy_history.append(accuracy)
+    print('epoch: ', epoch, ' -- cost: ', cost, ' -MSE: ', mse_, ' -Train accuracy: ', accuracy)
+
+save_path = saver.save(sess,model_path)
+print('model saved in ', save_path)
