@@ -57,12 +57,86 @@ n_hidden_4 = 60
 
 # Defining my placeholders and variables : input ,weights,biases and output
 x = tf.placeholder(tf.float32, [None, n_dim])
-W = tf.variable(tf.zeros([n_dim, n_classes]))
-b = tf.variable(tf.zeros([n_classes]))
+W = tf.Variable(tf.zeros([n_dim, n_classes]))
+b = tf.Variable(tf.zeros([n_classes]))
 y_ = tf.placeholder(tf.float32, [None, n_classes])
 
 
 # defining my model
 def multilayer_perceptron(x, weights,biases):
+    #hidden layer with sigmoid activation
 
-    return 2
+    layer_1 = tf.add(tf.matmul(x, weights['h1']), biases['b1'])
+    layer_1 = tf.sigmoid(layer_1)
+
+    # hidden layer 2
+    layer_2 = tf.add(tf.matmul(layer_1, weights['h2']), biases['b2'])
+    layer_2 = tf.sigmoid(layer_2)
+
+    # hidden layer 3
+    layer_3 = tf.add(tf.matmul(layer_2, weights['h3']), biases['b3'])
+    layer_3 = tf.sigmoid(layer_3)
+
+    # hidden layer 4
+    layer_4 = tf.add(tf.matmul(layer_3, weights['h4']), biases['b4'])
+    layer_4 = tf.nn.relu(layer_4)
+
+    #output layer
+    out_layer = tf.add(tf.matmul(layer_4, weights['out']), biases['out'])
+    return out_layer
+
+
+# defining the weights and biases
+# assigns random truncated values to weights and biases
+weights = {
+    'h1': tf.Variable(tf.truncated_normal([n_dim, n_hidden_1])),
+    'h2': tf.Variable(tf.truncated_normal([n_hidden_1, n_hidden_2])),
+    'h3': tf.Variable(tf.truncated_normal([n_hidden_2, n_hidden_3])),
+    'h4': tf.Variable(tf.truncated_normal([n_hidden_3, n_hidden_4])),
+    'out': tf.Variable(tf.truncated_normal([n_hidden_4, n_classes])),
+}
+
+# it is take every neuron has a different bias for it ,  i thought one layer had only on bias, well it
+# is all about your personal preference
+biases = {
+    'b1': tf.Variable(tf.truncated_normal([n_hidden_1])),
+    'b2': tf.Variable(tf.truncated_normal([n_hidden_2])),
+    'b3': tf.Variable(tf.truncated_normal([n_hidden_3])),
+    'b4': tf.Variable(tf.truncated_normal([n_hidden_4])),
+    'out': tf.Variable(tf.truncated_normal([n_classes])),
+}
+
+
+# Initialize all global variables
+
+init = tf.global_variables_initializer()
+
+# create a saver obj to save our model
+saver = tf.train.Saver()
+
+# call my model that i defined above
+
+y = multilayer_perceptron(x,weights,biases)
+
+# define cost fuction and gradient decent optimizer
+
+# logits is output given by hypothesis
+# labels are the actual output we know
+cost_function = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y, label=y_))
+
+# gradientdecent optimizer
+
+training_steps = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost_function)
+
+sess = tf.Session()
+sess.run(init)
+
+# calculate the cost and accuracy for each iteration
+
+for epoc in range(training_epocs):
+    sess.run(training_steps, feed_dict={x: train_x, y_: train_y})
+    cost = sess.run(cost_function, feed_dict={x: train_x, y_: train_y})
+    cost_history = np.append(cost_history, cost)
+    correct_prediction = tf.equal(tf.arg_max(y, 1),tf.arg_max(y_, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    pred_y = sess.run(y, feed_dict={x: test_x})
