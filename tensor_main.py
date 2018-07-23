@@ -19,6 +19,7 @@ def read_dataset():
     Y = one_hot_encode(y)
     return (X, Y)
 
+
 # this is speperating the class to like rock will be 10 and mine 01
 def one_hot_encode(labels):
     n_labels = len(labels)
@@ -27,6 +28,7 @@ def one_hot_encode(labels):
     one_hot_encode[np.arange(n_labels), labels] = 1
     return one_hot_encode
 
+
 # first we load the data
 X, Y = read_dataset()
 
@@ -34,7 +36,7 @@ X, Y = read_dataset()
 X, Y = shuffle(X, Y, random_state=1)
 print(shuffle(X, Y, random_state=1))
 # split the test cases and train
-train_x, test_x, train_y, test_y = train_test_split(X, Y, test_size=0.2, random_state=1)
+train_x, test_x, train_y, test_y = train_test_split(X, Y, test_size=0.2, random_state=415)
 
 # testing the shape
 # print(train_x.shape, test_x.shape, train_y.shape, train_y.shape)
@@ -154,3 +156,21 @@ for epoch in range(training_epocs):
 
 save_path = saver.save(sess,model_path)
 print('model saved in ', save_path)
+
+# plot mse and accuracy graph
+
+plt.plot(mse_history, 'r')
+plt.show()
+plt.plot(accuracy_history)
+plt.show()
+
+# print final accuracy
+correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+print("Test Accueracy :", sess.run(accuracy, feed_dict={x: test_x, y_: test_y}))
+
+# print final mean square error
+
+pred_y = sess.run(y, feed_dict={x: test_x})
+mse = tf.reduce_mean(tf.square(pred_y - test_y))
+print('MSE : ', sess.run(mse))
